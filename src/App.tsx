@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { generateCityToken, getStickyCode, STICKY_CODE_KEY } from './services/getToken'
+import { isValidStickyCode, normalizeStickyCode } from './services/fns'
 import { createStickyNote, getLatestMessage, LOGGED_IN, saveMessage, stickyCodeExists } from './services/messages'
 import Loader from './pages/components/loader'
 import './styles/sticker-card.css'
@@ -67,6 +68,25 @@ function App() {
     const newStickyCode = generateCityToken()
     setStickyCode(newStickyCode)
     setStickyCodeInput(newStickyCode)
+    setStickyCodeError('')
+  }
+
+  /** Validates and formats the sticky code while the user types. */
+  const handleStickyCodeInputChange = (value: string) => {
+    const normalized = normalizeStickyCode(value)
+    setStickyCodeInput(normalized)
+
+    if (!normalized) {
+      setStickyCodeError('Please enter a sticky code.')
+      return
+    }
+
+    if (!isValidStickyCode(normalized)) {
+      setStickyCodeError('Sticky code must be exactly 8 characters, letters and numbers only, with no spaces.')
+      return
+    }
+
+    setStickyCodeError('')
   }
 
   /** Closes the active sticky note and clears the local session. */
@@ -82,9 +102,9 @@ function App() {
 
   /** Opens an existing sticky note after validating its code. */
   const openStickyNoteHandler = async () => {
-    const code = stickyCodeInput.trim()
-    if (!code) {
-      setStickyCodeError('Please enter a sticky code.')
+    const code = normalizeStickyCode(stickyCodeInput)
+    if (!isValidStickyCode(code)) {
+      setStickyCodeError('Sticky code must be exactly 8 characters, letters and numbers only, with no spaces.')
       return
     }
     const loadingStartedAt = Date.now()
@@ -109,9 +129,9 @@ function App() {
 
   /** Creates a new sticky note from the entered code. */
   const createStickyNoteHandler = async () => {
-    const code = stickyCodeInput.trim()
-    if (!code) {
-      setStickyCodeError('Please enter a sticky code.')
+    const code = normalizeStickyCode(stickyCodeInput)
+    if (!isValidStickyCode(code)) {
+      setStickyCodeError('Sticky code must be exactly 8 characters, letters and numbers only, with no spaces.')
       return
     }
     const loadingStartedAt = Date.now()
@@ -121,6 +141,7 @@ function App() {
       await createStickyNote(code)
       setLoggedIn(true)
       setStickyCode(code)
+      setStickyCodeInput(code)
       localStorage.setItem(STICKY_CODE_KEY, code)
       await waitForLoader(loadingStartedAt)
       setStickyCodeError('')
@@ -275,7 +296,7 @@ function App() {
                 <div className="sticky-code-input-area">
                   <input
                     value={stickyCodeInput}
-                    onChange={(event) => setStickyCodeInput(event.target.value.toUpperCase())}
+                    onChange={(event) => handleStickyCodeInputChange(event.target.value)}
                     placeholder="Type or Generate a sticky code"
                     className={`room-input ${stickyCodeError ? 'border-red-500' : ''}`}
                   />

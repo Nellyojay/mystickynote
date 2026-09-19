@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { StickerMessage } from '../types/supabase'
+import { isValidStickyCode, normalizeStickyCode } from './fns'
 import { getStickyCode } from './getToken'
 
 export const STICKY_NOTE_TABLE_NAME = 'sticky_note'
@@ -8,9 +9,9 @@ export const LOGGED_IN = 'logged_in_sticky_note'
 
 /** Checks whether a sticky code exists and returns its note record. */
 export async function stickyCodeExists(stickyCode: string): Promise<[boolean, { id: string } | null]> {
-  const code = (stickyCode || getStickyCode()).trim()
+  const code = normalizeStickyCode(stickyCode || getStickyCode())
 
-  if (!code) {
+  if (!isValidStickyCode(code)) {
     return [false, null]
   }
 
@@ -77,14 +78,16 @@ export async function saveMessage(message: string, stickyNoteId: string) {
 
 /** Resolves a sticky code to its database note ID. */
 export async function resolveStickyNoteId(stickyCode: string): Promise<string | null> {
-  if (!stickyCode) {
+  const code = normalizeStickyCode(stickyCode)
+
+  if (!isValidStickyCode(code)) {
     return null
   }
 
   const { data, error } = await supabase
     .from(STICKY_NOTE_TABLE_NAME)
     .select('id')
-    .eq('sticky_code', stickyCode)
+    .eq('sticky_code', code)
     .single()
 
   if (error) {
@@ -97,9 +100,15 @@ export async function resolveStickyNoteId(stickyCode: string): Promise<string | 
 
 /** Creates a sticky note and stores the active note session locally. */
 export async function createStickyNote(stickyCode: string) {
+  const code = normalizeStickyCode(stickyCode)
+
+  if (!isValidStickyCode(code)) {
+    return false
+  }
+
   const { data, error } = await supabase
     .from(STICKY_NOTE_TABLE_NAME)
-    .insert({ sticky_code: stickyCode })
+    .insert({ sticky_code: code })
     .select('id')
     .single()
 
@@ -107,7 +116,7 @@ export async function createStickyNote(stickyCode: string) {
     return false;
   }
 
-  localStorage.setItem(LOGGED_IN, `${data.id}_${stickyCode}`);
+  localStorage.setItem(LOGGED_IN, `${data.id}_${code}`);
 
   return Boolean(data);
 }
