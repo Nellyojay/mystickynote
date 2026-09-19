@@ -275,8 +275,8 @@ function App() {
                 <div className="sticky-code-input-area">
                   <input
                     value={stickyCodeInput}
-                    onChange={(event) => setStickyCodeInput(event.target.value)}
-                    placeholder="Type a sticky code"
+                    onChange={(event) => setStickyCodeInput(event.target.value.toUpperCase())}
+                    placeholder="Type or Generate a sticky code"
                     className={`room-input ${stickyCodeError ? 'border-red-500' : ''}`}
                   />
                   <button
