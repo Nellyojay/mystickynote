@@ -270,7 +270,7 @@ function App() {
                     className="send-btn mb-4"
                     onClick={handleSendMessage}
                   >
-                    Send a little note
+                    Send note
                   </button>
                 </div>
 
