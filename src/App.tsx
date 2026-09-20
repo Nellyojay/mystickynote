@@ -4,7 +4,7 @@ import { isValidStickyCode, normalizeStickyCode } from './services/fns'
 import {
   clearStickyNoteOpenedAt,
   createStickyNote,
-  getLatestMessage,
+  fetchMessage,
   getStickyNoteByCode,
   getStickyNoteExpiryTimestamp,
   isStickyNoteExpiredRecord,
@@ -58,7 +58,7 @@ function App() {
       return
     }
 
-    const latestMessage = await getLatestMessage(noteId)
+    const latestMessage = await fetchMessage(noteId)
     if (latestMessage) {
       setSavedMessage(latestMessage.message)
       return
@@ -194,7 +194,7 @@ function App() {
     }
 
     if (stickyNoteRecord && (!stickyNoteRecord.opened_at || !stickyNoteRecord.expires_at)) {
-      const openedStickyNote = await openStickyNoteWindow(stickyNote.id)
+      const openedStickyNote = await openStickyNoteWindow(stickyNote.id, stickyNote.message || null)
       if (!openedStickyNote) {
         await waitForLoader(loadingStartedAt)
         setLoading(false)
@@ -208,7 +208,7 @@ function App() {
     setStickyCodeInput(code)
     localStorage.setItem(LOGGED_IN, `${stickyNote.id}_${code}`)
     localStorage.setItem(STICKY_CODE_KEY, code)
-    const latestMessage = await getLatestMessage(stickyNote.id)
+    const latestMessage = await fetchMessage(stickyNote.id)
     if (latestMessage) {
       setSaveMessageState(latestMessage.message)
     } else {
@@ -327,7 +327,7 @@ function App() {
 
   return (
     <main
-      className="flex min-h-screen items-center justify-center px-5"
+      className="flex min-h-screen items-center justify-center px-5 py-4"
       style={{
         background:
           'radial-gradient(circle at top left, rgba(235, 86, 86, 0.74), transparent 30%), radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.2), transparent 25%), linear-gradient(135deg, #f7d77a, #f4a261, #c77dff, #9ec5fe)',
@@ -357,7 +357,7 @@ function App() {
                   <textarea
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
-                    placeholder="Tell me something... anything..."
+                    placeholder="Type your message here..."
                     aria-label="Message"
                   />
                   {/* <p className="temporary-copy">
@@ -372,9 +372,9 @@ function App() {
               {showCloseConfirm && (
                 <div className="close-confirmation-backdrop" role="dialog" aria-modal="true">
                   <div className="close-confirmation">
-                    <p className="close-confirmation__title">This sticky note is temporary.</p>
+                    <p className="close-confirmation__title pb-4">Alert</p>
                     <p>
-                      Closing it hides it, but the timer continues. The note will self-destruct when the timer ends.
+                      {savedMessage ? 'The timer will start or resume when one reopens the sticky note. The note will self-destruct when the timer ends.' : 'Write or copy code so you don’t forget it. Come back anytime and write your message'}
                     </p>
                     <div className="button-row">
                       <button type="button" className="yes-btn" onClick={handleLogout}>

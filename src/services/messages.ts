@@ -1,15 +1,14 @@
 ﻿import { supabase } from '../lib/supabase'
-import type { StickerMessage, StickyNoteRecord } from '../types/supabase'
+import type { StickyNoteRecord } from '../types/supabase'
 import { isValidStickyCode, normalizeStickyCode } from './fns'
 import { getStickyCode } from './getToken'
 
 export const STICKY_NOTE_TABLE_NAME = 'sticky_note'
-export const STICKY_NOTE_MESSAGE_TABLE = 'sticky_message'
 export const LOGGED_IN = 'logged_in_sticky_note'
 export const STICKY_NOTE_TTL_MS = 3 * 60 * 60 * 1000
 export const STICKY_NOTE_STATUS_EXPIRED = 'EXPIRED'
 export const STICKY_NOTE_STATUS_ACTIVE = 'ACTIVE'
-const STICKY_NOTE_SELECT = 'id, sticky_code, status, created_at, opened_at, expires_at'
+const STICKY_NOTE_SELECT = 'id, sticky_code, status, created_at, opened_at, expires_at, message'
 
 const makeStickyNoteOpenedAtKey = (stickyCode: string) => `sticky_note_opened_at_${normalizeStickyCode(stickyCode)}`
 
@@ -116,7 +115,7 @@ export async function getStickyNoteByCode(stickyCode: string): Promise<StickyNot
   return (data as StickyNoteRecord | null) ?? null
 }
 
-export async function openStickyNoteWindow(stickyNoteId: string): Promise<StickyNoteRecord | null> {
+export async function openStickyNoteWindow(stickyNoteId: string, savedMessage: string | null): Promise<StickyNoteRecord | null> {
   if (!stickyNoteId) {
     return null
   }
@@ -128,7 +127,6 @@ export async function openStickyNoteWindow(stickyNoteId: string): Promise<Sticky
     .maybeSingle()
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Failed to fetch sticky note before opening:', error)
     throw error
   }
 
@@ -144,19 +142,19 @@ export async function openStickyNoteWindow(stickyNoteId: string): Promise<Sticky
   if (shouldResetExpiry) {
     const now = Date.now()
     const nextExpiresAt = new Date(now + STICKY_NOTE_TTL_MS).toISOString()
+
     const { data: updated, error: updateError } = await supabase
       .from(STICKY_NOTE_TABLE_NAME)
       .update({
-        opened_at: new Date(now).toISOString(),
-        expires_at: nextExpiresAt,
-        status: STICKY_NOTE_STATUS_ACTIVE,
+        opened_at: savedMessage ? new Date(now).toISOString() : null,
+        expires_at: savedMessage ? nextExpiresAt : null,
+        status: savedMessage ? STICKY_NOTE_STATUS_ACTIVE : null,
       })
       .eq('id', stickyNoteId)
       .select(STICKY_NOTE_SELECT)
       .maybeSingle()
 
     if (updateError) {
-      console.error('Failed to update sticky note expiry window:', updateError)
       throw updateError
     }
 
@@ -166,50 +164,44 @@ export async function openStickyNoteWindow(stickyNoteId: string): Promise<Sticky
   return data as StickyNoteRecord
 }
 
-/** Retrieves the newest message saved for a sticky note. */
-export async function getLatestMessage(stickyNoteId: string) {
-  const noteId = stickyNoteId
-
-  if (!noteId) {
+/** Fetches the currently saved message for a sticky note. */
+export async function fetchMessage(stickyNoteId: string) {
+  if (!stickyNoteId) {
     return null
   }
 
   const { data, error } = await supabase
-    .from(STICKY_NOTE_MESSAGE_TABLE)
-    .select('message, time_past, sticky_noteId')
-    .eq('sticky_noteId', noteId)
-    .order('time_past', { ascending: false })
-    .limit(1)
+    .from(STICKY_NOTE_TABLE_NAME)
+    .select('message')
+    .eq('id', stickyNoteId)
     .maybeSingle()
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Failed to load latest:', error)
+    console.error('Failed to load sticky message:', error)
     throw error
   }
 
-  return data as StickerMessage | null
+  return data && typeof data.message === 'string' ? { message: data.message } : null
 }
 
-/** Saves a message against a sticky note ID. */
+/** Saves a message against a sticky note ID by updating the message column on the note. */
 export async function saveMessage(message: string, stickyNoteId: string) {
   if (!message || !stickyNoteId) {
     throw new Error('No active sticky note found.')
   }
 
   const { data, error } = await supabase
-    .from(STICKY_NOTE_MESSAGE_TABLE)
-    .insert({
-      message,
-      sticky_noteId: stickyNoteId,
-    })
-    .select('*')
+    .from(STICKY_NOTE_TABLE_NAME)
+    .update({ message })
+    .eq('id', stickyNoteId)
+    .select('message')
     .single()
 
   if (error) {
     throw error
   }
 
-  return data as StickerMessage
+  return data as { message: string }
 }
 
 /** Marks a sticky note as expired without deleting its history. */
