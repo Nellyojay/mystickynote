@@ -352,7 +352,8 @@ function App() {
                 </div>
               ) : (
                 <div className="composer-box">
-                  <div className="composer-header">This note stays available for 3 hours after it is opened.</div>
+                  <div className="composer-header">Write or copy code so you don't forget it.</div>
+                  <div className="composer-header">Sticky Note expires 3 hours after it is opened.</div>
                   <textarea
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
