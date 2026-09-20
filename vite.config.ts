@@ -16,16 +16,19 @@ export default defineConfig({
       background_color: '#f7d77a',
       display: 'standalone',
       start_url: '/mystickynote/',
+      scope: '/mystickynote/',
       icons: [
         {
-          src: 'src/assets/images/mystickynote_app_icon.png',
+          src: '/mystickynote/mystickynote_app_icon.png',
           sizes: '192x192',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'any maskable'
         },
         {
-          src: 'src/assets/images/mystickynote_app_icon.png',
+          src: '/mystickynote/mystickynote_app_icon.png',
           sizes: '512x512',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'any maskable'
         }
       ]
     }
