@@ -327,7 +327,7 @@ function App() {
 
   return (
     <main
-      className="flex min-h-screen items-center justify-center px-5 py-4"
+      className="flex items-center justify-center px-5 py-6 sm:py-10"
       style={{
         background:
           'radial-gradient(circle at top left, rgba(235, 86, 86, 0.74), transparent 30%), radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.2), transparent 25%), linear-gradient(135deg, #f7d77a, #f4a261, #c77dff, #9ec5fe)',
@@ -347,7 +347,7 @@ function App() {
                 <div className="note-read-only">
                   <h1 className="message-title message-title--saved">{savedMessage}</h1>
                   {countdownActive && (
-                    <p className="temporary-copy">This note will self-destruct in {countdown}</p>
+                    <p className="temporary-copy sticky bottom-0">This note will self-destruct in {countdown}</p>
                   )}
                 </div>
               ) : (

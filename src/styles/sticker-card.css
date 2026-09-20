@@ -72,7 +72,7 @@ body {
   position: relative;
   width: min(100%, 540px);
   padding: 42px 28px 30px;
-  background: linear-gradient(180deg, #fff9b1 0%, #fef3a3 100%);
+  background: linear-gradient(180deg, #fff9b1 0%, #fff28b 100%);
   border: 3px solid rgba(161, 123, 28, 0.52);
   border-radius: 8px;
   box-shadow:
@@ -81,7 +81,7 @@ body {
     inset 0 0 0 2px rgba(255, 255, 255, 0.55);
   text-align: center;
   animation: stickerAppear 0.8s ease;
-  overflow: clip;
+  overflow: hidden;
 }
 
 .sticker-card::before,
@@ -156,6 +156,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(112, 13, 199, 0.29) rgba(203, 148, 20, 0);
 }
 
 .composer-header {
