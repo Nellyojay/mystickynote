@@ -128,13 +128,6 @@ body {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transform: rotate(0deg);
-}
-
-.emoji {
-  font-size: 65px;
-  margin-bottom: 15px;
-  animation: stickerFloat 2.5s ease-in-out infinite;
 }
 
 .message-layout {
@@ -159,26 +152,82 @@ body {
   animation: saved-message-enter 0.3s ease both;
 }
 
-.status-panel {
+.note-read-only {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 12px;
-  padding: 18px 10px;
+}
+
+.composer-header {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(91, 44, 131, 0.08);
+  color: #5b2c83;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.countdown-badge {
+  display: inline-flex;
+  align-self: center;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(91, 44, 131, 0.08);
+  color: #5b2c83;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.temporary-copy {
+  margin: 0;
+  color: rgba(33, 15, 15, 0.6);
+  font-size: 0.83rem;
+  line-height: 1.5;
   text-align: center;
+}
+
+.composer-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.close-confirmation-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 22, 9, 0.26);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 30;
+}
+
+.close-confirmation {
+  width: min(100%, 420px);
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(91, 44, 131, 0.18);
+  box-shadow: 0 18px 35px rgba(77, 59, 45, 0.18);
+  text-align: left;
+}
+
+.close-confirmation__title {
+  margin: 0 0 8px;
+  font-weight: 800;
   color: #5b2c83;
 }
 
-.status-panel--yes .status-title {
-  font-size: clamp(1.5rem, 2.3vw, 2.2rem);
-  font-weight: 800;
-}
-
-.status-copy {
+.close-confirmation p {
   margin: 0;
   color: #4d3b2d;
-  font-size: 1.05rem;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .note-box {
@@ -327,18 +376,10 @@ textarea {
   font-weight: 700;
   cursor: pointer;
   box-shadow: none;
-  margin-top: -16px;
 }
 
 .logout-btn:hover {
   background: rgba(91, 44, 131, 0.08);
-}
-
-.ghost-btn {
-  width: 100%;
-  background: transparent;
-  border: 1px solid rgba(91, 44, 131, 0.45);
-  color: #5b2c83;
 }
 
 .send-btn {
@@ -350,22 +391,12 @@ textarea {
   -webkit-backdrop-filter: blur(10px);
 }
 
-.composer-box:has(textarea:focus) .send-btn {
-  background: rgba(255, 255, 255, 0.575);
-}
-
-.small-note {
-  margin: 4px 0 0;
-  color: rgba(33, 15, 15, 0.45);
-  font-size: 0.875rem;
-  line-height: 1.6;
-}
-
 .button-row {
   display: flex;
   justify-content: center;
   gap: 15px;
   flex-wrap: wrap;
+  margin-top: 14px;
 }
 
 .yes-btn {
@@ -382,7 +413,6 @@ textarea {
 
 .primary-btn:hover,
 .secondary-btn:hover,
-.ghost-btn:hover,
 .send-btn:hover,
 .yes-btn:hover,
 .no-btn:hover {
@@ -391,19 +421,10 @@ textarea {
 
 .primary-btn:active,
 .secondary-btn:active,
-.ghost-btn:active,
 .send-btn:active,
 .yes-btn:active,
 .no-btn:active {
   transform: scale(0.98);
-}
-
-.countdown {
-  margin-top: 4px;
-  font-size: 0.75rem;
-  color: #5b2c83;
-  font-weight: 700;
-  letter-spacing: 0.04em;
 }
 
 @media (max-width: 480px) {
@@ -414,10 +435,6 @@ textarea {
   .sticker-card {
     padding: 34px 18px 22px;
   }
-}
-
-.sticker-card--celebrate {
-  animation: stickerCelebrate 0.6s ease;
 }
 
 @keyframes stickerAppear {
