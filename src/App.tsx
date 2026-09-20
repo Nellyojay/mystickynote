@@ -352,16 +352,16 @@ function App() {
                 </div>
               ) : (
                 <div className="composer-box">
-                  <div className="composer-header">Temporary sticky note</div>
+                  <div className="composer-header">This note stays available for 3 hours after it is opened.</div>
                   <textarea
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
                     placeholder="Tell me something... anything..."
                     aria-label="Message"
                   />
-                  <p className="temporary-copy">
+                  {/* <p className="temporary-copy">
                     This note stays available for 3 hours after it is opened.
-                  </p>
+                  </p> */}
                   <button type="button" className="send-btn" onClick={handleSendMessage}>
                     Send note
                   </button>
